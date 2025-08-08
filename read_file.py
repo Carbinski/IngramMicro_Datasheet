@@ -57,9 +57,15 @@ def convert_accounting_number(num_str):
 
 
 def add_images(worksheet):
-    worksheet.insert_image('A1', 'Logos/UAG.png')
-    worksheet.insert_image('A7', 'Logos/Ingram Micro.png')
-    worksheet.insert_image('P9', 'Logos/TAMCO.png')
+    try:
+        worksheet.insert_image('A1', 'Logos/UAG.png')
+    except FileNotFoundError:
+        print("Warning: Logos/UAG.png not found, skipping image insert.")
+
+    try:
+        worksheet.insert_image('A7', 'Logos/Ingram Micro.png')
+    except FileNotFoundError:
+        print("Warning: Logos/Ingram Micro.png not found, skipping image insert.")
 
 
 def parse_line_by_format(line, format):
