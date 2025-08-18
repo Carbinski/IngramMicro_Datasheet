@@ -24,9 +24,51 @@ jobs:
         python -m pip install --upgrade pip
         pip install python-dotenv pandas pyinstaller
     
-    - name: Build executable
+    - name: Create PyInstaller spec file
       run: |
-        pyinstaller --exclude-module torch --exclude-module torchvision --exclude-module tensorflow --exclude-module sklearn --exclude-module scipy --exclude-module PIL --exclude-module matplotlib --exclude-module transformers --exclude-module IPython --exclude-module jupyter --exclude-module jedi --exclude-module parso --exclude-module pygments --exclude-module fsspec --exclude-module pydantic --exclude-module jinja2 --exclude-module regex --exclude-module yt_dlp --exclude-module mutagen --exclude-module brotli --exclude-module secretstorage --exclude-module curl_cffi --exclude-module certifi --exclude-module urllib3 --exclude-module requests --exclude-module wcwidth --exclude-module charset_normalizer --exclude-module win32com --onefile read_file.py
+        echo "# -*- mode: python ; coding: utf-8 -*-" > read_file.spec
+        echo "" >> read_file.spec
+        echo "excludes = [" >> read_file.spec
+        echo "    'torch', 'torchvision', 'tensorflow', 'sklearn', 'scipy'," >> read_file.spec
+        echo "    'PIL', 'matplotlib', 'transformers', 'IPython', 'jupyter'," >> read_file.spec
+        echo "    'jedi', 'parso', 'pygments', 'fsspec', 'pydantic'," >> read_file.spec
+        echo "    'jinja2', 'regex', 'yt_dlp', 'mutagen', 'brotli'," >> read_file.spec
+        echo "    'secretstorage', 'curl_cffi', 'certifi', 'urllib3'," >> read_file.spec
+        echo "    'requests', 'wcwidth', 'charset_normalizer', 'win32com'" >> read_file.spec
+        echo "]" >> read_file.spec
+        echo "" >> read_file.spec
+        echo "a = Analysis(" >> read_file.spec
+        echo "    ['read_file.py']," >> read_file.spec
+        echo "    pathex=[]," >> read_file.spec
+        echo "    binaries=[]," >> read_file.spec
+        echo "    datas=[]," >> read_file.spec
+        echo "    hiddenimports=[]," >> read_file.spec
+        echo "    hookspath=[]," >> read_file.spec
+        echo "    hooksconfig={}," >> read_file.spec
+        echo "    runtime_hooks=[]," >> read_file.spec
+        echo "    excludes=excludes," >> read_file.spec
+        echo "    noarchive=False," >> read_file.spec
+        echo ")" >> read_file.spec
+        echo "" >> read_file.spec
+        echo "pyz = PYZ(a.pure, a.zipped_data)" >> read_file.spec
+        echo "" >> read_file.spec
+        echo "exe = EXE(" >> read_file.spec
+        echo "    pyz," >> read_file.spec
+        echo "    a.scripts," >> read_file.spec
+        echo "    a.binaries," >> read_file.spec
+        echo "    a.zipfiles," >> read_file.spec
+        echo "    a.datas," >> read_file.spec
+        echo "    []," >> read_file.spec
+        echo "    name='read_file'," >> read_file.spec
+        echo "    debug=False," >> read_file.spec
+        echo "    bootloader_ignore_signals=False," >> read_file.spec
+        echo "    strip=False," >> read_file.spec
+        echo "    upx=True," >> read_file.spec
+        echo "    console=True," >> read_file.spec
+        echo ")" >> read_file.spec
+    
+    - name: Build executable
+      run: pyinstaller read_file.spec
     
     - name: Upload executable
       uses: actions/upload-artifact@v4
