@@ -26,36 +26,7 @@ jobs:
     
     - name: Build executable
       run: |
-        pyinstaller --exclude-module torch ^
-                   --exclude-module torchvision ^
-                   --exclude-module tensorflow ^
-                   --exclude-module sklearn ^
-                   --exclude-module scipy ^
-                   --exclude-module PIL ^
-                   --exclude-module matplotlib ^
-                   --exclude-module transformers ^
-                   --exclude-module IPython ^
-                   --exclude-module jupyter ^
-                   --exclude-module jedi ^
-                   --exclude-module parso ^
-                   --exclude-module pygments ^
-                   --exclude-module fsspec ^
-                   --exclude-module pydantic ^
-                   --exclude-module jinja2 ^
-                   --exclude-module regex ^
-                   --exclude-module yt_dlp ^
-                   --exclude-module mutagen ^
-                   --exclude-module brotli ^
-                   --exclude-module secretstorage ^
-                   --exclude-module curl_cffi ^
-                   --exclude-module certifi ^
-                   --exclude-module urllib3 ^
-                   --exclude-module requests ^
-                   --exclude-module wcwidth ^
-                   --exclude-module charset_normalizer ^
-                   --exclude-module win32com ^
-                   --onefile ^
-                   read_file.py
+        pyinstaller --exclude-module torch --exclude-module torchvision --exclude-module tensorflow --exclude-module sklearn --exclude-module scipy --exclude-module PIL --exclude-module matplotlib --exclude-module transformers --exclude-module IPython --exclude-module jupyter --exclude-module jedi --exclude-module parso --exclude-module pygments --exclude-module fsspec --exclude-module pydantic --exclude-module jinja2 --exclude-module regex --exclude-module yt_dlp --exclude-module mutagen --exclude-module brotli --exclude-module secretstorage --exclude-module curl_cffi --exclude-module certifi --exclude-module urllib3 --exclude-module requests --exclude-module wcwidth --exclude-module charset_normalizer --exclude-module win32com --onefile read_file.py
     
     - name: Upload executable
       uses: actions/upload-artifact@v4
