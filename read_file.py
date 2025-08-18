@@ -352,7 +352,7 @@ def write_equations(df):
 
     df.iloc[:, 2] = df.iloc[:, 2].astype(str)
 
-    with pd.ExcelWriter(f"{os.getenv("NAME")} {cal.get_report_date_str().replace('/', '-')}.xlsx", engine="xlsxwriter") as writer:
+    with pd.ExcelWriter(f"{os.getenv('NAME')} {cal.get_report_date_str().replace('/', '-')}.xlsx", engine="xlsxwriter") as writer:
         workbook  = writer.book
         df.to_excel(writer, index=False, sheet_name=os.getenv("NAME"), startrow = START_ROW)
 
