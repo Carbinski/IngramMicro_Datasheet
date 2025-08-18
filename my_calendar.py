@@ -1,5 +1,7 @@
 import bisect
 from datetime import datetime, timedelta
+import os
+import json
 
 class My_Calendar:
     def __init__(self):
@@ -25,6 +27,10 @@ class My_Calendar:
         last_sunday = today - timedelta(days=days_since_sunday)
         self.report_date = last_sunday
         self.report_date_str = self._format_date(last_sunday)
+
+    def set_calendar(self, fiscal_periods_raw):
+        fiscal_periods_list = json.loads(fiscal_periods_raw)
+        self.FISCAL_PERIODS = [(datetime.strptime(d, "%Y-%m-%d"), label) for d, label in fiscal_periods_list]
 
     def get_relative_months(self):
         starts = [d[0] for d in self.FISCAL_PERIODS]

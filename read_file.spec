@@ -10,7 +10,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['torch', 'torchvision', 'tensorflow', 'sklearn', 'scipy', 'PIL', 'cv2', 'matplotlib', 'transformers', 'onnxruntime', 'IPython', 'jupyter', 'jedi', 'parso', 'pygments', 'openpyxl', 'fsspec', 'pydantic', 'jinja2', 'regex', 'yt_dlp', 'mutagen', 'brotli', 'secretstorage', 'curl_cffi', 'certifi', 'urllib3', 'requests', 'wcwidth', 'charset_normalizer', 'win32com'],
+    excludes=['torch', 'torchvision', 'tensorflow', 'sklearn', 'scipy', 'PIL', 'matplotlib', 'transformers', 'IPython', 'jupyter', 'jedi', 'parso', 'pygments', 'fsspec', 'pydantic', 'jinja2', 'regex', 'yt_dlp', 'mutagen', 'brotli', 'secretstorage', 'curl_cffi', 'certifi', 'urllib3', 'requests', 'wcwidth', 'charset_normalizer', 'win32com'],
     noarchive=False,
     optimize=0,
 )

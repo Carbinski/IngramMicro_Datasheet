@@ -9,8 +9,9 @@ Make sure it is an executable (```read_file```)
 Double click it
 
 Notes:
-Make sure there is a .env
+Make sure there is a .env with the ```RAW_FILE``` name, ```NAME``` and ```FISCAL_PERIODS```
 You can go into the .env to change the .txt file it reads from
+You can also modify the ```FISCAL_PERIODS``` to update it for a new calendar year
 It will take a second to run
 If you want to remove a logo, delete it from the logos folder
 
@@ -29,6 +30,35 @@ Then in the terminal navigate to the read_file.py and type (a trick to doing thi
 
 If you want to remake the .exe:
 
-```source myapp_env/bin/activate```
+```source myapp_env/bin/activate``` 
 
-```pyinstaller --exclude-module torch \ --exclude-module torchvision \ --exclude-module tensorflow \ --exclude-module sklearn \ --exclude-module scipy \ --exclude-module PIL \ --exclude-module cv2 \ --exclude-module matplotlib \ --exclude-module transformers \ --exclude-module onnxruntime \ --exclude-module IPython \ --exclude-module jupyter \ --exclude-module jedi \ --exclude-module parso \ --exclude-module pygments \ --exclude-module openpyxl \ --exclude-module fsspec \ --exclude-module pydantic \ --exclude-module jinja2 \ --exclude-module regex \ --exclude-module yt_dlp \ --exclude-module mutagen \ --exclude-module brotli \ --exclude-module secretstorage \ --exclude-module curl_cffi \ --exclude-module certifi \ --exclude-module urllib3 \ --exclude-module requests \ --exclude-module wcwidth \ --exclude-module charset_normalizer \ --exclude-module win32com \ --onefile \ read_file.py```
+```pyinstaller --exclude-module torch \
+           --exclude-module torchvision \
+           --exclude-module tensorflow \
+           --exclude-module sklearn \
+           --exclude-module scipy \
+           --exclude-module PIL \
+           --exclude-module matplotlib \
+           --exclude-module transformers \
+           --exclude-module IPython \
+           --exclude-module jupyter \
+           --exclude-module jedi \
+           --exclude-module parso \
+           --exclude-module pygments \
+           --exclude-module fsspec \
+           --exclude-module pydantic \
+           --exclude-module jinja2 \
+           --exclude-module regex \
+           --exclude-module yt_dlp \
+           --exclude-module mutagen \
+           --exclude-module brotli \
+           --exclude-module secretstorage \
+           --exclude-module curl_cffi \
+           --exclude-module certifi \
+           --exclude-module urllib3 \
+           --exclude-module requests \
+           --exclude-module wcwidth \
+           --exclude-module charset_normalizer \
+           --exclude-module win32com \
+           --onefile \
+           read_file.py```

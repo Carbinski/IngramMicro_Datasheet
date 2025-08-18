@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from dotenv import load_dotenv
 from my_calendar import My_Calendar
+import time
 import os
 import re
 import sys
@@ -92,19 +93,18 @@ def parse_line_by_format(line, format):
 
         extra_parts = re.split(r'\s+', remaining.strip())
 
-        # Add remaining items until total fields == 9. This eliminates the extra un-used field
+        # Add remaining items until total fields == 13. This eliminates the extra un-used field
         while len(fields) < 13 and extra_parts:
             curr = extra_parts.pop(0)
 
             # Remove the un-used ['N'] field if it is in the item
             if curr == "N":
                 curr = extra_parts.pop(0)
-            elif curr.isnumeric():
-                curr = int(curr)
-            elif is_float(curr):
-                curr = float(curr)
-            else:
+            elif re.fullmatch(r'[-+]?\d+(?:\.\d+)?-?', curr):
+                # plain numeric or accounting-style negative
                 curr = convert_accounting_number(curr)
+            else:
+                pass
 
             fields.append(curr)
 
@@ -123,12 +123,12 @@ def parse_line_by_format(line, format):
         # Add remaining items
         while extra_parts:
             curr = extra_parts.pop(0)
-            if curr.isnumeric():
-                curr = int(curr)
-            elif is_float(curr):
-                curr = float(curr)
-            else:
+            if re.fullmatch(r'[-+]?\d+(?:\.\d+)?-?', curr):
+                # plain numeric or accounting-style negative
                 curr = convert_accounting_number(curr)
+            else:
+                pass
+            
             fields.append(curr)
 
         return fields
@@ -350,23 +350,33 @@ def write_equations(df):
     for index, name, _ in FORMULAS:
         df.insert(index, name, '')
 
+    df.iloc[:, 2] = df.iloc[:, 2].astype(str)
+
     with pd.ExcelWriter(f"{os.getenv("NAME")} {cal.get_report_date_str().replace('/', '-')}.xlsx", engine="xlsxwriter") as writer:
         workbook  = writer.book
         df.to_excel(writer, index=False, sheet_name=os.getenv("NAME"), startrow = START_ROW)
 
         worksheet = writer.sheets[os.getenv("NAME")]
 
+
+        left_format = workbook.add_format({
+            'align': 'left',
+            'valign': 'vcenter',
+            'num_format': '@' 
+        })
+        
+        # Force ALL data rows in column C (index 2) to be written as text
+        # Pandas writes the header at row START_ROW, and data begins at row START_ROW + 1 (0-indexed)
+        for r, val in enumerate(df.iloc[:, 2], start=START_ROW + 1):
+            worksheet.write_string(r, 2, str(val), left_format)
+
         for i in range(START_ROW, START_ROW + len(df)):
             row_num = i + 2  # Excel rows are 1-indexed and row 1 is the header
 
             for index, _, formula_template in FORMULAS:
                 # turns formula into properly formated formula
-                if isinstance(formula_template, str):
-                    formula = formula_template.format(row_num=row_num)
-                    worksheet.write_formula(i + 1, index, formula)
-                # for testing when I don't have Trending 2 Month RR completed
-                else:
-                    worksheet.write(i + 1, index, formula_template)
+                formula = formula_template.format(row_num=row_num)
+                worksheet.write_formula(i + 1, index, formula)
 
         set_headers(workbook, worksheet)
         define_formats(workbook, worksheet)
@@ -415,24 +425,7 @@ def clean_spreadsheet(df):
 
     return df
 
-
-def main():
-
-    print(" Welcome! ") 
-    print(" Choose one of the following commands: ")
-    print(" 0. Run program for most recent Sunday")
-    print(" 1. Set report date (If it is not on Sunday it may break)")
-    outcome = input("Enter command: ")
-
-    if outcome == "1":
-        print("Enter report date (MM/DD/YYYY)")
-        date = input("Set report date: ")
-        cal.set_report_date(date)
-        print("Sucessfully set custom report date. Now running script!")
-    elif outcome != "0":
-        print("Invalid input, please run program again and use valid input.")
-        raise ValueError("Invalid input")
-
+def run_script():
     # Get the directory where the executable resides (not the temp bundle directory)
     if getattr(sys, 'frozen', False):
         # If bundled by PyInstaller, get the executable's directory
@@ -460,6 +453,13 @@ def main():
     os.chdir(base_path)
     print("Current directory:", os.getcwd())
 
+    print("Setting calendar")
+    fiscal_periods_raw = os.getenv("FISCAL_PERIODS")
+    if not fiscal_periods_raw:
+        print ("FISCAL_PERIODS not set, using default")
+    else:
+        cal.set_calendar(fiscal_periods_raw)
+
     # Get the raw file path - it should be relative to the executable's directory
     raw_file = os.getenv("RAW_FILE")
     if not raw_file:
@@ -469,7 +469,7 @@ def main():
     raw_file_path = os.path.join(base_path, raw_file)
     if not os.path.exists(raw_file_path):
         raise FileNotFoundError(f"Data file not found: {raw_file_path}")
-    
+
     print("Current directory:", os.getcwd())
     rows = []
     format = [ID_LENGTH, " "*8, LEN_DESC_1, "", 4, " ", 6]
@@ -484,6 +484,69 @@ def main():
     df = pd.DataFrame(rows)
     df = clean_spreadsheet(df)
     write_equations(df)
+
+
+def input_with_timeout(prompt, timeout=10, default="0"):
+    """Return the user's input if entered within `timeout` seconds,
+    otherwise return `default`. Works on both POSIX and Windows.
+    """
+    if os.name == "nt":  # Windows
+        import msvcrt
+        sys.stdout.write(prompt)
+        sys.stdout.flush()
+        buf = ""
+        start = time.time()
+        while True:
+            if msvcrt.kbhit():
+                ch = msvcrt.getwche()   # echo the character
+                if ch in ("\r", "\n"):
+                    return buf
+                elif ch == "\x03":  # Ctrl-C
+                    raise KeyboardInterrupt
+                elif ch == "\x08":  # backspace
+                    buf = buf[:-1]
+                else:
+                    buf += ch
+            if (time.time() - start) > timeout:
+                sys.stdout.write("\n")  # move to next line after timeout
+                sys.stdout.flush()
+                return default
+            time.sleep(0.01)
+    else:  # POSIX (Linux / macOS / etc.)
+        import select
+        sys.stdout.write(prompt)
+        sys.stdout.flush()
+        rlist, _, _ = select.select([sys.stdin], [], [], timeout)
+        if rlist:
+            return sys.stdin.readline().rstrip("\n")
+        else:
+            sys.stdout.write("\n")
+            sys.stdout.flush()
+            return default
+
+
+def main():
+
+    print(" Welcome! ") 
+    print(" Choose one of the following commands: ")
+    print(" 0. Run program for most recent Sunday")
+    print(" 1. Set report date (If it is not on Sunday it may break)")
+    outcome = input_with_timeout("Enter command (defaults to 0 after 10s): ", timeout=10, default="0")
+
+    # normalize empty string just in case
+    if outcome == "":
+        outcome = "0"
+
+    if outcome == "1":
+        print("Enter report date (MM/DD/YYYY)")
+        date = input("Set report date: ")
+        cal.set_report_date(date)
+        print("Sucessfully set custom report date. Now running script!")
+    elif outcome != "0":
+        print("Invalid input, please run program again and use valid input.")
+        raise ValueError("Invalid input")
+    
+    run_script()
 
 
 if __name__ == "__main__":
