@@ -1,0 +1,8 @@
+# Ignore everything in the Dad folder
+Dad/
+
+# Ignore everything in the old executables folder
+old executables/
+
+*.xlsx
+*.txt
